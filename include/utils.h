@@ -31,4 +31,8 @@ void free_double_matrix(double_matrix_t *matrix);
  * @return A double array containing the data from theoriginal matrix in row major format.
  */
 double *convert_to_1d(double_matrix_t *matrix);
+
+void swap_d(double *arr, int i, int j);
+void swap_i(int *arr, int i, int j);
+void quicksort(double *arr, int *idx, int n);
 #endif  // UTILS_H

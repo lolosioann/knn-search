@@ -20,20 +20,6 @@ double *knn_search(double_matrix_t* C, double_matrix_t* Q, int k, int* idx);
 
 
 /**
- * @brief Finds the k-nearest neighbors for a set of query points.
- *
- * This function computes the k-nearest neighbors for each query point in a dataset.
- *
- * @param D A pointer to the distance matrix. The matrix should be of size (query__n * corpus_n).
- * @param corpus_n The number of points in the corpus dataset.
- * @param query_n The number of query points.
- * @param k The number of nearest neighbors to find.
- * @param idx A pointer to an array where the indices of the nearest neighbors will be stored.
- */
-void find_knn(double *D,int corpus_n, int query_n, int k, int *idx);
-
-
-/**
  * @brief Performs the quickselect algorithm to find the k-th smallest element in an array.
  *
  * This function rearranges the elements in the array such that the k-th smallest element
@@ -65,8 +51,5 @@ void quickselect(double *arr, int *idx, int start, int n, int k);
  * @return The index of the partition point.
  */
 int partition(double *arr, int *idx, int start, int n);
-
-void swap_d(double *arr, int i, int j);
-void swap_i(int *arr, int i, int j);
 
 #endif  // KNN_H

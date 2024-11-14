@@ -48,3 +48,39 @@ double *convert_to_1d(double_matrix_t *matrix) {
 
     return data;
 }
+
+void quicksort(double *arr, int *idx, int n) {
+    if (n < 2) {
+        return;
+    }
+
+    double pivot = arr[n / 2];
+    int i, j;
+    for (i = 0, j = n - 1; ; i++, j--) {
+        while (arr[i] < pivot) {
+            i++;
+        }
+        while (arr[j] > pivot) {
+            j--;
+        }
+        if (i >= j) {
+            break;
+        }
+        swap_d(arr, i, j);
+        swap_i(idx, i, j);
+    }
+    quicksort(arr, idx, i);
+    quicksort(arr + i, idx + i, n - i);
+}
+
+void swap_d(double *arr, int i, int j) {
+    double temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+}
+
+void swap_i(int *arr, int i, int j) {
+    int temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+}

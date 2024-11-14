@@ -28,27 +28,11 @@ double *knn_search(double_matrix_t* C, double_matrix_t* Q, int k, int* idx) {
                 -2.0, C_1d, dim, Q_1d, dim,
                 0.0, CQ_T, query_n);
 
-    // print CQ_T for debugging
-    printf("CQ_T:\n");
-    for (int i = 0; i < corpus_n; i++) {
-        for (int j = 0; j < query_n; j++) {
-            printf("%f ", CQ_T[i * query_n + j]);
-        }
-        printf("\n");
-    }
-
     // compute C.^2
     double *C2 = (double *)malloc(corpus_n * sizeof(double));
     for (int i = 0; i < corpus_n; i++) {
         C2[i] = cblas_ddot(dim, C_1d + i*dim, 1, C_1d + i*dim, 1);
     }
-
-    // print C2 for debugging
-    printf("C2:\n");
-    for (int i = 0; i < corpus_n; i++) {
-        printf("%f ", C2[i]);
-    }
-    printf("\n");
 
     // compute Q.^2
     double *Q2 = (double *)malloc(query_n * sizeof(double));
@@ -59,23 +43,15 @@ double *knn_search(double_matrix_t* C, double_matrix_t* Q, int k, int* idx) {
     // compute the distance matrix
     for (int i = 0; i < corpus_n; i++) {
         for (int j = 0; j < query_n; j++) {
-            D[i * query_n + j] = sqrt(C2[i] + Q2[j] + CQ_T[i * query_n + j]);
+            D[j * corpus_n + i] = sqrt(C2[i] + Q2[j] + CQ_T[i * query_n + j]);
         }
     }
-
-    // print the distance matrix for debugging
-    printf("Distance matrix:\n");
-    for (int i = 0; i < corpus_n; i++) {
-        for (int j = 0; j < query_n; j++) {
-            printf("%f ", D[i * query_n + j]);
-        }
-        printf("\n");
-    }
-
-
 
     // find the k-nearest neighbors
-    find_knn(D, corpus_n, query_n, k, idx);
+    for (int i = 0; i < query_n; i++) {
+        quickselect(D + i * corpus_n, idx + i * k, 0, corpus_n, k);
+        quicksort(D + i * k, idx + i * k, k);
+    }
 
     // free memory
     free(C_1d);
@@ -89,14 +65,6 @@ double *knn_search(double_matrix_t* C, double_matrix_t* Q, int k, int* idx) {
     free(Q2);
     Q2 = NULL;
     return D;
-}
-
-
-void find_knn(double *d, int corpus_n, int query_n, int k, int *idx) {
-    for (int i = 0; i < query_n; i++) {
-        quickselect(d + i * corpus_n, idx + i * k, 0, corpus_n, k);
-        //quicksort(d + i * corpus_n, idx + i * k, dst + i * k, corpus_n, k);
-    }
 }
 
 void quickselect(double *arr, int *idx, int start, int n, int k) { 
@@ -128,16 +96,4 @@ int partition(double *arr, int *idx, int start, int n) {
     swap_d(arr, n - 1, storeIndex);
     swap_i(idx, n - 1, storeIndex);
     return storeIndex;
-}
-
-void swap_d(double *arr, int i, int j) {
-    double temp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = temp;
-}
-
-void swap_i(int *arr, int i, int j) {
-    int temp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = temp;
 }

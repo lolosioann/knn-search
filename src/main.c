@@ -34,8 +34,12 @@ int main(int argc, char** argv)
         fprintf(stderr, "Error: Non-numeric characters detected.\n");
         return 1;
     }
-    else if (conv > INT_MAX || conv < 0) {
-        fprintf(stderr, "Error: Integer exceeds 'int' range.\n");
+    else if (conv > INT_MAX) {
+        fprintf(stderr, "Error: k exceeds 'int' range.\n");
+        return 1;
+    }
+    else if (conv <= 0) {
+        fprintf(stderr, "Error: k must be a positive integer.\n");
         return 1;
     }
     else
@@ -79,37 +83,12 @@ int main(int argc, char** argv)
             idx[i * corpus->rows + j] = j + 1;
         }
     }
-    // print corpus for debugging
-    printf("Corpus:\n");
-    for (int i = 0; i < corpus->rows; i++) {
-        for (int j = 0; j < corpus->cols; j++) {
-            printf("%f ", corpus->data[i][j]);
-        }
-        printf("\n");
-    }
-
-    // print query for debugging
-    printf("Query:\n");
-    for (int i = 0; i < query->rows; i++) {
-        for (int j = 0; j < query->cols; j++) {
-            printf("%f ", query->data[i][j]);
-        }
-        printf("\n");
-    }
-
-    // print idx for debugging
-    for (int i = 0; i < query->rows; i++) {
-        for (int j = 0; j < corpus->rows; j++) {
-            printf("%d ", idx[i * corpus->rows + j]);
-        }
-        printf("\n");
-    }
-
     
     int corpus_n = corpus->rows;
     // Call KNN search function
     double *D = knn_search(corpus, query, k, idx);
 
+    // Allocate memory for the first k elements of idx
     int *idx_new = malloc(query->rows * k * sizeof(int));
     if (idx_new == NULL) {
         fprintf(stderr, "Failed to allocate memory for idx_new\n");
@@ -118,12 +97,13 @@ int main(int argc, char** argv)
     // copy the first k elements of idx to idx_new
     for (int i = 0; i < query->rows; i++) {
         for (int j = 0; j < k; j++) {
-            idx_new[i * k + j] = idx[i * corpus_n + j];
+            idx_new[j * query->rows + i] = idx[i * corpus_n + j];
         }
     }
     free(idx);
     idx = NULL;
 
+    // Allocate memory for the first k elements of D
     double *dst = malloc(query->rows * k * sizeof(double));
     if (dst == NULL) {
         fprintf(stderr, "Failed to allocate memory for dst\n");
@@ -132,29 +112,12 @@ int main(int argc, char** argv)
     // copy the first k elements of D to dst
     for (int i = 0; i < query->rows; i++) {
         for (int j = 0; j < k; j++) {
-            dst[i * k + j] = D[i * corpus_n + j];
+            dst[j * query->rows + i] = D[i * corpus_n + j];
         }
     }
     free(D);
     D = NULL;
-
-    // print idx_new for debbuging
-    for (int i = 0; i < query->rows; i++) {
-        for (int j = 0; j < k; j++) {
-            printf("%d ", idx_new[i * k + j]);
-        }
-        printf("\n");
-    }
-
-    //print dst for debugging
-    for (int i = 0; i < query->rows; i++) {
-        for (int j = 0; j < k; j++) {
-            printf("%f ", dst[i * k + j]);
-        }
-        printf("\n");
-    }
-
-
+    
     // Output results to .mat file
     if (!write_mat_file(argv[4], idx_new, dst, query->rows, k)) {
         fprintf(stderr, "Failed to write results to .mat file\n");
